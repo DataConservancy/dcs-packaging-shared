@@ -16,12 +16,18 @@
 
 package org.dataconservancy.packaging.shared;
 
-import org.apache.jena.rdf.model.*;
+import org.apache.jena.rdf.model.Model;
 
 import org.dataconservancy.packaging.tool.api.Package;
 import org.dataconservancy.packaging.tool.api.PackageGenerationService;
 import org.dataconservancy.packaging.tool.impl.IpmRdfTransformService;
-import org.dataconservancy.packaging.tool.model.*;
+import org.dataconservancy.packaging.tool.model.BagItParameterNames;
+import org.dataconservancy.packaging.tool.model.GeneralParameterNames;
+import org.dataconservancy.packaging.tool.model.PackageGenerationParameters;
+import org.dataconservancy.packaging.tool.model.PackageState;
+import org.dataconservancy.packaging.tool.model.ParametersBuildException;
+import org.dataconservancy.packaging.tool.model.PropertiesConfigurationParametersBuilder;
+import org.dataconservancy.packaging.tool.model.RDFTransformException;
 import org.dataconservancy.packaging.tool.model.ipm.Node;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -39,8 +45,8 @@ import java.util.Properties;
 public class IpmPackager {
 
     // TODO - There is a GitHub issue in osf-packaging about this use of this system property.
-    private String PACKAGE_LOCATION = System.getProperty("java.io.tmpdir");
-    private String PACKAGE_NAME = "MyPackage";
+    private String packageLocation = System.getProperty("java.io.tmpdir");
+    private String packageName = "MyPackage";
 
     private final ClassPathXmlApplicationContext cxt = new ClassPathXmlApplicationContext(
         "classpath*:org/dataconservancy/config/applicationContext.xml",
@@ -59,7 +65,7 @@ public class IpmPackager {
      * @param packageLocation The existing folder where the package file will be created.
      */
     public void setPackageLocation(String packageLocation) {
-        this.PACKAGE_LOCATION = packageLocation;
+        this.packageLocation = packageLocation;
     }
 
     /**
@@ -68,7 +74,7 @@ public class IpmPackager {
      * @param packageName The root name of the package folder that will be created.
      */
     public void setPackageName(String packageName) {
-        this.PACKAGE_NAME = packageName;
+        this.packageName = packageName;
     }
 
     /**
@@ -80,7 +86,7 @@ public class IpmPackager {
      * @return A populated Package
      * @throws RuntimeException if the content cannot be processed successfully.
      */
-    public Package buildPackage(ContentProvider contentProvider,
+    public Package buildPackage(AbstractContentProvider contentProvider,
                                 InputStream metadataStream,
                                 InputStream paramsStream) {
         try {
@@ -94,9 +100,7 @@ public class IpmPackager {
             PackageGenerationParameters params = getGenerationParameters(paramsStream);
             PackageGenerationService generator = cxt.getBean(PackageGenerationService.class);
             return generator.generatePackage(state, params);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -106,7 +110,7 @@ public class IpmPackager {
      * @param state The state to which the domain objects is assigned.
      * @param contentProvider The source of the domain objects.
      */
-    private void setDomainModel(PackageState state, ContentProvider contentProvider) {
+    private void setDomainModel(PackageState state, AbstractContentProvider contentProvider) {
         Model jenaModel = contentProvider.getDomainModel();
         state.setDomainObjectRDF(jenaModel);
     }
@@ -117,7 +121,7 @@ public class IpmPackager {
      * @param contentProvider The source of the IPM model.
      * @throws RDFTransformException Thrown if the transformation from IPM to RDF fails.
      */
-    private void setIpmModel(PackageState state, ContentProvider contentProvider) throws RDFTransformException {
+    private void setIpmModel(PackageState state, AbstractContentProvider contentProvider) throws RDFTransformException {
         IpmRdfTransformService ipm2rdf = cxt.getBean(IpmRdfTransformService.class);
         Node ipmTree = contentProvider.getIpmModel();
         Model ipmRdfTree = ipm2rdf.transformToRDF(ipmTree);
@@ -131,8 +135,9 @@ public class IpmPackager {
      * @throws java.io.IOException Thrown if the Properties loading fails.
      */
     private void setMetadata(PackageState state, InputStream metadataStream) throws java.io.IOException {
-        if (metadataStream == null)
+        if (metadataStream == null) {
             return;
+        }
 
         LinkedHashMap<String, List<String>> metadata = new LinkedHashMap<>();
         Properties props = new Properties();
@@ -160,8 +165,8 @@ public class IpmPackager {
     private PackageGenerationParameters getGenerationParameters(InputStream paramsStream) throws ParametersBuildException {
         PackageGenerationParameters params =
                 new PropertiesConfigurationParametersBuilder().buildParameters(paramsStream);
-        params.addParam(GeneralParameterNames.PACKAGE_LOCATION, PACKAGE_LOCATION);
-        params.addParam(GeneralParameterNames.PACKAGE_NAME, PACKAGE_NAME);
+        params.addParam(GeneralParameterNames.PACKAGE_LOCATION, packageLocation);
+        params.addParam(GeneralParameterNames.PACKAGE_NAME, packageName);
         return params;
     }
 

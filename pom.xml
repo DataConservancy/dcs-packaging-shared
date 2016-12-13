@@ -24,7 +24,7 @@
     <packaging>jar</packaging>
     <name>DC Packaging Shared</name>
     <description>Shared code for Data Conservancy Packaging</description>
-    <version>1.0.3</version>
+    <version>1.0.0-SNAPSHOT</version>
 
     <parent>
         <groupId>org.dataconservancy</groupId>

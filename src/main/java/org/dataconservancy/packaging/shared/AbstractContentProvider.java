@@ -16,14 +16,15 @@
 
 package org.dataconservancy.packaging.shared;
 
-import org.apache.jena.rdf.model.*;
+import org.apache.jena.rdf.model.Model;
 import org.dataconservancy.packaging.tool.model.ipm.Node;
 
 /**
  * Base class for providing package content to the IpmPackager class.
  * Created by wbt on 11/30/16.
  */
-abstract public class ContentProvider {
-    abstract public Model getDomainModel();
-    abstract public Node getIpmModel();
+public abstract class AbstractContentProvider {
+    public abstract Model getDomainModel();
+    public abstract Node getIpmModel();
+    public void close() {}
 }
