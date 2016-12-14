@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * @author Ben Trumbore (wbt3@cornell.edu).
  */
 
 package org.dataconservancy.packaging.shared;
@@ -40,11 +42,10 @@ import java.util.Properties;
 
 /**
  * Creates a DC package from a content provider, metadata and generation parameters.
- * Created by wbt on 12/01/16.
+ * @author Ben Trumbore (wbt3@cornell.edu).
  */
 public class IpmPackager {
 
-    // TODO - There is a GitHub issue in osf-packaging about this use of this system property.
     private String packageLocation = System.getProperty("java.io.tmpdir");
     private String packageName = "MyPackage";
 
@@ -64,7 +65,7 @@ public class IpmPackager {
      * The location defaults to Java's temp IO folder.
      * @param packageLocation The existing folder where the package file will be created.
      */
-    public void setPackageLocation(String packageLocation) {
+    public void setPackageLocation(final String packageLocation) {
         this.packageLocation = packageLocation;
     }
 
@@ -73,7 +74,7 @@ public class IpmPackager {
      * The name defaults to "MyPackage".
      * @param packageName The root name of the package folder that will be created.
      */
-    public void setPackageName(String packageName) {
+    public void setPackageName(final String packageName) {
         this.packageName = packageName;
     }
 
@@ -86,19 +87,19 @@ public class IpmPackager {
      * @return A populated Package
      * @throws RuntimeException if the content cannot be processed successfully.
      */
-    public Package buildPackage(AbstractContentProvider contentProvider,
-                                InputStream metadataStream,
-                                InputStream paramsStream) {
+    public Package buildPackage(final AbstractContentProvider contentProvider,
+                                final InputStream metadataStream,
+                                final InputStream paramsStream) {
         try {
             // Create the state and populate it with the provided content
-            PackageState state = new PackageState();
+            final PackageState state = new PackageState();
             setDomainModel(state, contentProvider);
             setIpmModel(state, contentProvider);
             setMetadata(state, metadataStream);
 
             // Read the generation parameters, generate the package and return it.
-            PackageGenerationParameters params = getGenerationParameters(paramsStream);
-            PackageGenerationService generator = cxt.getBean(PackageGenerationService.class);
+            final PackageGenerationParameters params = getGenerationParameters(paramsStream);
+            final PackageGenerationService generator = cxt.getBean(PackageGenerationService.class);
             return generator.generatePackage(state, params);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
@@ -110,8 +111,8 @@ public class IpmPackager {
      * @param state The state to which the domain objects is assigned.
      * @param contentProvider The source of the domain objects.
      */
-    private void setDomainModel(PackageState state, AbstractContentProvider contentProvider) {
-        Model jenaModel = contentProvider.getDomainModel();
+    private void setDomainModel(final PackageState state, final AbstractContentProvider contentProvider) {
+        final Model jenaModel = contentProvider.getDomainModel();
         state.setDomainObjectRDF(jenaModel);
     }
 
@@ -121,10 +122,11 @@ public class IpmPackager {
      * @param contentProvider The source of the IPM model.
      * @throws RDFTransformException Thrown if the transformation from IPM to RDF fails.
      */
-    private void setIpmModel(PackageState state, AbstractContentProvider contentProvider) throws RDFTransformException {
-        IpmRdfTransformService ipm2rdf = cxt.getBean(IpmRdfTransformService.class);
-        Node ipmTree = contentProvider.getIpmModel();
-        Model ipmRdfTree = ipm2rdf.transformToRDF(ipmTree);
+    private void setIpmModel(final PackageState state, final AbstractContentProvider contentProvider)
+            throws RDFTransformException {
+        final IpmRdfTransformService ipm2rdf = cxt.getBean(IpmRdfTransformService.class);
+        final Node ipmTree = contentProvider.getIpmModel();
+        final Model ipmRdfTree = ipm2rdf.transformToRDF(ipmTree);
         state.setPackageTree(ipmRdfTree);
     }
 
@@ -134,13 +136,13 @@ public class IpmPackager {
      * @param metadataStream A stream from which the metadata is read (as Java Properties).
      * @throws java.io.IOException Thrown if the Properties loading fails.
      */
-    private void setMetadata(PackageState state, InputStream metadataStream) throws java.io.IOException {
+    private void setMetadata(final PackageState state, final InputStream metadataStream) throws java.io.IOException {
         if (metadataStream == null) {
             return;
         }
 
-        LinkedHashMap<String, List<String>> metadata = new LinkedHashMap<>();
-        Properties props = new Properties();
+        final LinkedHashMap<String, List<String>> metadata = new LinkedHashMap<>();
+        final Properties props = new Properties();
         props.load(metadataStream);
         List<String> valueList;
 
@@ -162,8 +164,9 @@ public class IpmPackager {
      * @return The collection of parameters.
      * @throws ParametersBuildException Thrown if the parameter loading fails.
      */
-    private PackageGenerationParameters getGenerationParameters(InputStream paramsStream) throws ParametersBuildException {
-        PackageGenerationParameters params =
+    private PackageGenerationParameters getGenerationParameters(final InputStream paramsStream)
+            throws ParametersBuildException {
+        final PackageGenerationParameters params =
                 new PropertiesConfigurationParametersBuilder().buildParameters(paramsStream);
         params.addParam(GeneralParameterNames.PACKAGE_LOCATION, packageLocation);
         params.addParam(GeneralParameterNames.PACKAGE_NAME, packageName);

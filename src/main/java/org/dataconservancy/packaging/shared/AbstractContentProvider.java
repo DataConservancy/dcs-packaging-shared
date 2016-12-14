@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * @author Ben Trumbore (wbt3@cornell.edu).
  */
 
 package org.dataconservancy.packaging.shared;
@@ -21,10 +23,28 @@ import org.dataconservancy.packaging.tool.model.ipm.Node;
 
 /**
  * Base class for providing package content to the IpmPackager class.
- * Created by wbt on 11/30/16.
+ * These objects should be constructed in a try-with-resources so that
+ * close() is called afterwards, allowing the class to clean up resources.
+ * @author Ben Trumbore (wbt3@cornell.edu).
  */
-public abstract class AbstractContentProvider {
+public abstract class AbstractContentProvider implements AutoCloseable {
+
+    /**
+     * Returns a representation of the domain model for this content provider.
+     * @return The Model representing the domain objects.
+     */
     public abstract Model getDomainModel();
+
+    /**
+     * Returns a representation of the IPM model for this content provider.
+     * @return The Node representing the root of the IPM Model.
+     **/
     public abstract Node getIpmModel();
-    public void close() {}
+
+    /**
+     * Called at the completion of a try-with-resources that constructs an instance
+     * of a derived class, allowing the instance to clean up resources.
+     */
+    public void close() {
+    }
 }
