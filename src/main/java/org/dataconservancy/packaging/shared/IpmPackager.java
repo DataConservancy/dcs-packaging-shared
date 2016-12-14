@@ -12,8 +12,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * @author Ben Trumbore (wbt3@cornell.edu).
  */
 
 package org.dataconservancy.packaging.shared;
@@ -90,7 +88,8 @@ public class IpmPackager {
     public Package buildPackage(final AbstractContentProvider contentProvider,
                                 final InputStream metadataStream,
                                 final InputStream paramsStream) {
-        try {
+        // Use try-with-resources here so the provider's close() is called afterwards.
+        try (AbstractContentProvider provider = contentProvider){
             // Create the state and populate it with the provided content
             final PackageState state = new PackageState();
             setDomainModel(state, contentProvider);
