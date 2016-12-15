@@ -89,7 +89,7 @@ public class IpmPackager {
                                 final InputStream metadataStream,
                                 final InputStream paramsStream) {
         // Use try-with-resources here so the provider's close() is called afterwards.
-        try (AbstractContentProvider provider = contentProvider){
+        try (AbstractContentProvider provider = contentProvider) {
             // Create the state and populate it with the provided content
             final PackageState state = new PackageState();
             setDomainModel(state, contentProvider);
