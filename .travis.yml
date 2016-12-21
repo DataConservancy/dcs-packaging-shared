@@ -2,8 +2,10 @@ language: java
 install: true
 before_script:
   - echo "MAVEN_OPTS='-Xmx1024m'" > ~/.mavenrc
+  - if [ "$TRAVIS_PULL_REQUEST" = "false" ] ; then openssl aes-256-cbc -K $encrypted_30a580860ff9_key -iv $encrypted_30a580860ff9_iv -in settings.tar.enc -out settings.tar -d && tar -xf settings.tar && cat known_hosts >> ~/.ssh/known_hosts ; fi
 script:
 - mvn verify
+- if [ "$TRAVIS_PULL_REQUEST" = "false" ] ; then mvn -s ./settings.xml deploy ; fi
 jdk:
 - oraclejdk8
 notifications:
