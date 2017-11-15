@@ -35,7 +35,7 @@
 
     <properties>
         <spring.version>4.2.0.RELEASE</spring.version>
-        <dcs-ptg.version>1.0.5-SNAPSHOT</dcs-ptg.version>
+        <dcs-ptg.version>1.0.8-SNAPSHOT</dcs-ptg.version>
     </properties>
 
     <!-- Build  ===================================================== -->
